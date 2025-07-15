@@ -1,0 +1,39 @@
+name: Build Props (build-only)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build props
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        device_name: [komodo_beta16, caiman_beta16, husky_beta16, cheetah_beta16, raven_beta16]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install APT packages
+        run: sudo apt install -y dos2unix
+
+      - name: Activate venv
+        run: |
+          python3 -m venv .venv/
+          . .venv/bin/activate
+          echo PATH=$PATH >> "$GITHUB_ENV"
+
+      - name: Install payload_dumper
+        run: pip install ./payload_dumper/
+
+      - name: Make all scripts executable
+        run: chmod +x *.sh
+
+      - name: Download latest OTA build for ${{ matrix.device_name }}
+        run: ./download_latest_ota_build.sh ${{ matrix.device_name }}
+
+      - name: Extract images and build
+        run: ./extract_images.sh
