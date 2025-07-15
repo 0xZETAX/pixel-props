@@ -37,3 +37,9 @@ jobs:
 
       - name: Extract images and build
         run: ./extract_images.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: props-${{ matrix.device_name }}
+          path: ./*.zip
